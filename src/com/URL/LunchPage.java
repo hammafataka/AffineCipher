@@ -18,78 +18,7 @@ public class LunchPage implements ActionListener {
     JTextField enterField=new JTextField();
     JButton myButton2=new JButton("Decrypt");
 
-
-
-
-    String encryptMessage(char[] msg)
-    {
-
-
-        int a=Integer.parseInt(afield.getText());
-        int b =Integer.parseInt(bField.getText());
-        /// Cipher Text initially empty
-        String cipher = "";
-        for (int i = 0; i < msg.length; i++)
-        {
-            // Avoid space to be encrypted
-            /* applying encryption formula ( a x + b ) mod m
-            {here x is msg[i] and m is 26} and added 'A' to
-            bring it in range of ascii alphabet[ 65-90 | A-Z ] */
-            if (msg[i] != ' ')
-            {
-                cipher = cipher + (char) ((((a * (msg[i] - 'A')) + b) % 26) + 'A');
-            } else // else simply append space character
-            {
-                cipher += "XSPACEX";
-            }
-        }
-        return cipher;
-    }
-
-    String decryptCipher(String cipher)
-    {
-
-            int a=Integer.parseInt(afield.getText());
-            int b =Integer.parseInt(bField.getText());
-
-
-
-        String msg = "";
-        int a_inv = 0;
-        int flag = 0;
-
-        //Find a^-1 (the multiplicative inverse of a
-        //in the group of integers modulo m.)
-        for (int i = 0; i < 26; i++)
-        {
-            flag = (a * i) % 26;
-
-            // Check if (a*i)%26 == 1,
-            // then i will be the multiplicative inverse of a
-            if (flag == 1)
-            {
-                a_inv = i;
-            }
-        }
-        for (int i = 0; i < cipher.length(); i++)
-        {
-            /*Applying decryption formula a^-1 ( x - b ) mod m
-            {here x is cipher[i] and m is 26} and added 'A'
-            to bring it in range of ASCII alphabet[ 65-90 | A-Z ] */
-            if (cipher.charAt(i) != ' ')
-            {
-                msg = msg + (char) (((a_inv *
-                        ((cipher.charAt(i) + 'A' - b)) % 26)) + 'A');
-            }
-            else //else simply append space characte
-            {
-                msg += cipher.charAt(i);
-            }
-        }
-
-        return msg;
-    }
-
+    private static final int ALPHABET_SIZE = 26;
 
     LunchPage(){
 
@@ -135,6 +64,170 @@ public class LunchPage implements ActionListener {
 
     }
 
+    public void decryption()
+    {
+
+
+
+        int aInverse = 0;
+        boolean isAOk = false;
+        try {
+            int a=Integer.parseInt(afield.getText());
+            int b =Integer.parseInt(bField.getText());
+            String ciphertext = enterField.getText();
+
+            while (!isAOk) {
+
+                if (gcd(a, ALPHABET_SIZE) == 1) {
+                    isAOk = true;
+                    aInverse = findInverse(a, ALPHABET_SIZE);
+                } else {
+                    System.out.println("'a' is not ok, please try again.");
+                }
+            }
+
+
+            decrypt(aInverse, b, ciphertext);
+
+        }catch (Exception e){
+            JOptionPane.showMessageDialog(null,"Please Put Correct format of A and B");
+
+        }
+
+
+    }
+
+    private static void decrypt(int aInverse, int b, String ciphertext) {
+        if (ciphertext == null || ciphertext.length() <= 0) {
+            JOptionPane.showMessageDialog(null,"Plaintext has a problem.");
+            return;
+        }
+
+        ciphertext = ciphertext.toLowerCase();
+        StringBuilder plaintext = new StringBuilder();
+        int z, j;
+
+        for (int i = 0; i < ciphertext.length(); i++) {
+            char agent = ciphertext.charAt(i);
+            z = aInverse * ((agent - 97) - b);
+            j = z < 0 ? minusMod(z, ALPHABET_SIZE) : z % ALPHABET_SIZE;
+            plaintext.append((char) ('A' + j));
+        }
+        JOptionPane.showMessageDialog(null,"Plaintext: " + plaintext);
+    }
+    private static int minusMod(int minus, int mod) {
+        int a = Math.abs(minus);
+        return (mod * ((a / mod) + 1)) - a;
+    }
+
+
+    private  int findInverse(double firstNumber, double anotherNumber) {
+        int a1, b1, a2, b2, r, q, temp_a2, temp_b2, n1, n2, max;
+
+        if (firstNumber > anotherNumber) {
+            max = (int) firstNumber;
+            n1 = (int) firstNumber;
+            n2 = (int) anotherNumber;
+        } else {
+            max = (int) anotherNumber;
+            n1 = (int) anotherNumber;
+            n2 = (int) firstNumber;
+        }
+
+        a1 = b2 = 1;
+        b1 = a2 = 0;
+        temp_a2 = a2;
+        temp_b2 = b2;
+
+        r = n1 % n2;
+        q = n1 / n2;
+
+        while (r != 0) {
+            n1 = n2;
+            n2 = r;
+            a2 = a1 - q * a2;
+            b2 = b1 - q * b2;
+            a1 = temp_a2;
+            b1 = temp_b2;
+            temp_a2 = a2;
+            temp_b2 = b2;
+            r = n1 % n2;
+            q = n1 / n2;
+        }
+
+        int result;
+        if (firstNumber == max) {
+            if (a2 < 0) {
+                result = (int) (a2 - anotherNumber * Math.floor(a2 / anotherNumber));
+            } else {
+                result = a2;
+            }
+        } else {
+            if (b2 < 0) {
+                result = (int) (b2 - anotherNumber * Math.floor(b2 / anotherNumber));
+            } else
+                result = b2;
+        }
+        return result;
+    }
+
+    public  void encryption() {
+        boolean isAOk = false, isBOk = false;
+        int a = 0, b = 0;
+
+        String plaintext = enterField.getText();
+
+
+        try {
+            while (!isAOk) {
+                a =Integer.parseInt( afield.getText());
+                if (gcd(a, ALPHABET_SIZE) == 1) {
+                    isAOk = true;
+                } else {
+                    JOptionPane.showMessageDialog(null,"'a' is not ok, pls try again.");
+                }
+            }
+
+            while (!isBOk) {
+
+                System.out.print("Choose 'b' which number you want but not equal 1 >> ");
+                b =Integer.parseInt( bField.getText());
+                if (b != 1) {
+                    isBOk = true;
+                } else {
+                    JOptionPane.showMessageDialog(null,"'b' is not ok, pls try again.");
+                }
+            }
+            encrypt(a, b, plaintext);
+        }catch (Exception e){
+            JOptionPane.showMessageDialog(null,"Please Put Correct format of A and B");
+        }
+
+
+    }
+
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+
+    private static void encrypt(int a, int b, String plaintext) {
+        if (plaintext == null || plaintext.length() <= 0) {
+            System.out.println("Plaintext has a problem. Bye bye :)");
+            return;
+        }
+
+        plaintext = plaintext.toLowerCase();
+        StringBuilder ciphertext = new StringBuilder();
+
+        for (int i = 0; i < plaintext.length(); i++) {
+            char agent = plaintext.charAt(i);
+            int value = ((a * (agent - 97) + b) % ALPHABET_SIZE);
+            ciphertext.append((char) (value + 97));
+        }
+        JOptionPane.showMessageDialog(null,"Ciphertext: " + ciphertext);
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -144,17 +237,9 @@ public class LunchPage implements ActionListener {
 
         }else {
             if(e.getSource()==myButton){
-                String text=enterField.getText();
-
-                // Calling encryption function
-                String cipherText = encryptMessage(text.toCharArray());
-                JOptionPane.showMessageDialog(null, "Encrypted Message is: "+cipherText, "Result: " , JOptionPane.INFORMATION_MESSAGE);
+                encryption();
             }else if(e.getSource()==myButton2){
-                String text=enterField.getText();
-
-                // Calling encryption function
-                String cipherText = encryptMessage(text.toCharArray());
-                JOptionPane.showMessageDialog(null, "Decrypted Message is: "+decryptCipher(cipherText), "Result: " , JOptionPane.INFORMATION_MESSAGE);
+                decryption();
             }
         }
     }
