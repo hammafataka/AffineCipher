@@ -1,11 +1,9 @@
 package com.URL;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicArrowButton;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.PublicKey;
 
 public class LunchPage implements ActionListener {
     JFrame frame=new JFrame();
@@ -76,18 +74,20 @@ public class LunchPage implements ActionListener {
             int b =Integer.parseInt(bField.getText());
             String ciphertext = enterField.getText();
 
-            while (!isAOk) {
+
 
                 if (gcd(a, ALPHABET_SIZE) == 1) {
                     isAOk = true;
-                    aInverse = findInverse(a, ALPHABET_SIZE);
+                    aInverse = findInverse(a);
                 } else {
-                    System.out.println("'a' is not ok, please try again.");
+                    JOptionPane.showMessageDialog(null,"'a' is not ok, please try again.");
                 }
+
+
+            if(isAOk){
+                decrypt(aInverse, b, ciphertext);
+
             }
-
-
-            decrypt(aInverse, b, ciphertext);
 
         }catch (Exception e){
             JOptionPane.showMessageDialog(null,"Please Put Correct format of A and B");
@@ -110,27 +110,27 @@ public class LunchPage implements ActionListener {
         for (int i = 0; i < ciphertext.length(); i++) {
             char agent = ciphertext.charAt(i);
             z = aInverse * ((agent - 97) - b);
-            j = z < 0 ? minusMod(z, ALPHABET_SIZE) : z % ALPHABET_SIZE;
+            j = z < 0 ? minusMod(z) : z % ALPHABET_SIZE;
             plaintext.append((char) ('A' + j));
         }
         JOptionPane.showMessageDialog(null,"Plaintext: " + plaintext);
     }
-    private static int minusMod(int minus, int mod) {
+    private static int minusMod(int minus) {
         int a = Math.abs(minus);
-        return (mod * ((a / mod) + 1)) - a;
+        return (LunchPage.ALPHABET_SIZE * ((a / LunchPage.ALPHABET_SIZE) + 1)) - a;
     }
 
 
-    private  int findInverse(double firstNumber, double anotherNumber) {
+    private  int findInverse(double firstNumber) {
         int a1, b1, a2, b2, r, q, temp_a2, temp_b2, n1, n2, max;
 
-        if (firstNumber > anotherNumber) {
+        if (firstNumber > (double) LunchPage.ALPHABET_SIZE) {
             max = (int) firstNumber;
             n1 = (int) firstNumber;
-            n2 = (int) anotherNumber;
+            n2 = (int) (double) LunchPage.ALPHABET_SIZE;
         } else {
-            max = (int) anotherNumber;
-            n1 = (int) anotherNumber;
+            max = (int) (double) LunchPage.ALPHABET_SIZE;
+            n1 = (int) (double) LunchPage.ALPHABET_SIZE;
             n2 = (int) firstNumber;
         }
 
@@ -158,13 +158,13 @@ public class LunchPage implements ActionListener {
         int result;
         if (firstNumber == max) {
             if (a2 < 0) {
-                result = (int) (a2 - anotherNumber * Math.floor(a2 / anotherNumber));
+                result = (int) (a2 - (double) LunchPage.ALPHABET_SIZE * Math.floor(a2 / (double) LunchPage.ALPHABET_SIZE));
             } else {
                 result = a2;
             }
         } else {
             if (b2 < 0) {
-                result = (int) (b2 - anotherNumber * Math.floor(b2 / anotherNumber));
+                result = (int) (b2 - (double) LunchPage.ALPHABET_SIZE * Math.floor(b2 / (double) LunchPage.ALPHABET_SIZE));
             } else
                 result = b2;
         }
@@ -173,32 +173,36 @@ public class LunchPage implements ActionListener {
 
     public  void encryption() {
         boolean isAOk = false, isBOk = false;
-        int a = 0, b = 0;
+        int a, b ;
 
         String plaintext = enterField.getText();
 
 
         try {
-            while (!isAOk) {
+
+
                 a =Integer.parseInt( afield.getText());
                 if (gcd(a, ALPHABET_SIZE) == 1) {
                     isAOk = true;
                 } else {
                     JOptionPane.showMessageDialog(null,"'a' is not ok, pls try again.");
                 }
-            }
 
-            while (!isBOk) {
 
-                System.out.print("Choose 'b' which number you want but not equal 1 >> ");
+
+
+
                 b =Integer.parseInt( bField.getText());
                 if (b != 1) {
                     isBOk = true;
                 } else {
                     JOptionPane.showMessageDialog(null,"'b' is not ok, pls try again.");
                 }
+
+            if(isAOk && isBOk){
+                encrypt(a, b, plaintext);
             }
-            encrypt(a, b, plaintext);
+
         }catch (Exception e){
             JOptionPane.showMessageDialog(null,"Please Put Correct format of A and B");
         }
@@ -213,12 +217,13 @@ public class LunchPage implements ActionListener {
 
     private static void encrypt(int a, int b, String plaintext) {
         if (plaintext == null || plaintext.length() <= 0) {
-            System.out.println("Plaintext has a problem. Bye bye :)");
+            JOptionPane.showMessageDialog(null,"Please enter a Plain text in..");
             return;
         }
 
         plaintext = plaintext.toLowerCase();
         StringBuilder ciphertext = new StringBuilder();
+
 
         for (int i = 0; i < plaintext.length(); i++) {
             char agent = plaintext.charAt(i);
